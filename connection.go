@@ -12,7 +12,7 @@ type XDBSession struct {
 	tx          *sql.Tx
 	Finished    bool
 
-	logger xlog.XLog
+	Logger xlog.XLog
 }
 
 func (mysql MySQL) NewDBSession(tx bool, logger xlog.XLog) *XDBSession {
@@ -26,14 +26,14 @@ func (mysql MySQL) NewDBSession(tx bool, logger xlog.XLog) *XDBSession {
 			Transaction: true,
 			Finished:    false,
 			tx:          transaction,
-			logger:      logger,
+			Logger:      logger,
 		}
 	}
 	return &XDBSession{
 		db:          mysql.database,
 		Transaction: false,
 		tx:          nil,
-		logger:      logger,
+		Logger:      logger,
 	}
 }
 
