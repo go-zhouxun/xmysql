@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/zhouxun1995/xlog"
+	"github.com/go-zhouxun/xlog"
 )
 
 type MySQL struct {

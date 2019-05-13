@@ -3,7 +3,7 @@ package xmysql
 import (
 	"database/sql"
 
-	"github.com/zhouxun1995/xlog"
+	"github.com/go-zhouxun/xlog"
 )
 
 type XDBSession struct {
