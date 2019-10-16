@@ -2,42 +2,37 @@ package xmysql
 
 import (
 	"database/sql"
-
-	"github.com/go-zhouxun/xlog"
 )
 
-type XDBSession struct {
+type XConnection struct {
 	db          *sql.DB
 	Transaction bool
 	tx          *sql.Tx
 	Finished    bool
-
-	Logger xlog.XLog
 }
 
-func (mysql MySQL) NewDBSession(tx bool, logger xlog.XLog) *XDBSession {
-	if tx {
-		transaction, err := mysql.database.Begin()
-		if err != nil {
-			return nil
-		}
-		return &XDBSession{
-			db:          mysql.database,
-			Transaction: true,
-			Finished:    false,
-			tx:          transaction,
-			Logger:      logger,
-		}
+func (mysql MySQL) BeginTx() *XConnection {
+	transaction, err := mysql.database.Begin()
+	if err != nil {
+		return nil
 	}
-	return &XDBSession{
+	return &XConnection{
+		db:          mysql.database,
+		Transaction: true,
+		Finished:    false,
+		tx:          transaction,
+	}
+}
+
+func (mysql MySQL) GetConnection() *XConnection {
+	return &XConnection{
 		db:          mysql.database,
 		Transaction: false,
 		tx:          nil,
-		Logger:      logger,
 	}
 }
 
-func (xmysql *XDBSession) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (xmysql *XConnection) Exec(query string, args ...interface{}) (sql.Result, error) {
 	if xmysql.Transaction && !xmysql.Finished {
 		return xmysql.tx.Exec(query, args...)
 	} else {
@@ -45,7 +40,7 @@ func (xmysql *XDBSession) Exec(query string, args ...interface{}) (sql.Result, e
 	}
 }
 
-func (xmysql *XDBSession) QueryRow(query string, args ...interface{}) *sql.Row {
+func (xmysql *XConnection) QueryRow(query string, args ...interface{}) *sql.Row {
 	if xmysql.Transaction && !xmysql.Finished {
 		return xmysql.tx.QueryRow(query, args...)
 	} else {
@@ -53,7 +48,7 @@ func (xmysql *XDBSession) QueryRow(query string, args ...interface{}) *sql.Row {
 	}
 }
 
-func (xmysql *XDBSession) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (xmysql *XConnection) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	if xmysql.Transaction && !xmysql.Finished {
 		return xmysql.tx.Query(query, args...)
 	} else {
@@ -61,7 +56,7 @@ func (xmysql *XDBSession) Query(query string, args ...interface{}) (*sql.Rows, e
 	}
 }
 
-func (xmysql *XDBSession) Commit() error {
+func (xmysql *XConnection) Commit() error {
 	if xmysql.Transaction && !xmysql.Finished {
 		err := xmysql.tx.Commit()
 		if err == nil {
@@ -72,7 +67,7 @@ func (xmysql *XDBSession) Commit() error {
 	return nil
 }
 
-func (xmysql *XDBSession) Rollback() error {
+func (xmysql *XConnection) Rollback() error {
 	if xmysql.Transaction && !xmysql.Finished {
 		err := xmysql.tx.Rollback()
 		if err == nil {

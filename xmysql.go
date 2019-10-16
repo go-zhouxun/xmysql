@@ -3,21 +3,10 @@ package xmysql
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/go-zhouxun/xlog"
 )
 
 type MySQL struct {
 	database *sql.DB
-	logger   xlog.XLog
-}
-
-func (mysql *MySQL) GetConnection() *XDBSession {
-	return mysql.NewDBSession(false, mysql.logger)
-}
-
-func (mysql *MySQL) Begin() *XDBSession {
-	return mysql.NewDBSession(true, mysql.logger)
 }
 
 func NewMySQl(config XMySQLConfig) *MySQL {
